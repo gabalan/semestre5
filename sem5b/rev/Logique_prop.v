@@ -1,0 +1,301 @@
+(*  Logique intuitionniste *)
+
+Section LJ.
+ Variables P Q R S T : Prop.
+ (*  Tactiques pour la conjonction 
+
+    Introduction : pour prouver A /\ B : split (il faudra prouver A, puis B)
+    Elimination : destruct H, si H : A /\ B 
+                  variante : destruct H as [H1 H2].
+        Dans les deux cas, on récupère deux hypothèses pour A et B.
+  *)
+ Lemma and_comm : P /\ Q -> Q /\ P.
+ Proof.
+   intro H.
+   destruct H as [H0 H1].
+   split; assumption.
+ Qed.
+
+ (* tactiques pour la disjonction 
+    Introduction:
+     pour prouver A \/ B a partir de A : left
+     pour prouver A \/ B a partir de B : right
+
+    Elimination:
+     preuve par cas : destruct H, si H: A \/ B
+                      variante : destruct H as [H1 | H2]
+        On aura a faire deux preuves, une pour chaque cas (cas A, cas B)
+  *)
+
+  Lemma or_not : P \/ Q -> ~P -> Q.
+  Proof.
+   intros H H0.     
+   destruct H.     
+   - assert (f:False).
+     {
+       apply H0; trivial.
+     }
+     destruct f.
+   - assumption.
+   Qed.
+
+   (*  equivalence logique :
+       A <-> B se transforme en (A -> B) /\ (B -> A).
+       donc split, destruct, unfold iff marchent
+
+       (iff pour "if and only if", le "si et seulement si" en anglais)
+    *)
+
+  Lemma iff_comm : (P <-> Q) -> (Q <-> P).
+  Proof.
+    intro H.
+     destruct H.
+     split.
+     assumption.
+     assumption.
+  Qed.
+
+  (* la regle de remplacement est implantée en Coq *)
+  Require Import Setoid.
+  Lemma L1 : (P <-> Q) -> ~(Q <-> ~P).
+  Proof.  
+     intro H.
+     rewrite H.  (* Variantes : rewrite <- H 
+                                rewrite H in H0
+                                etc.
+                  *)
+     intro H0;destruct H0.
+     assert (~Q).
+     { intro H2.
+       apply H0; assumption.
+     }
+     apply H2. apply H1. assumption. 
+  Qed.
+
+
+  (* Exercice : remplacer tauto par des vraies preuves interactives *)
+  (*  Exercices de la feuille 2 *)
+
+  Lemma and_false : P /\ False -> False.
+  Proof. 
+    tauto.
+   Qed.
+
+  Lemma and_assoc : (P /\ Q) /\ R <-> P /\ (Q /\ R).
+  Proof.
+    tauto.
+   Qed.
+
+  (* Ex. 8 *)
+  Lemma or2imp: ~ P \/ Q -> P -> Q.
+  Proof.
+   tauto.
+  Qed.   
+
+  Lemma not_or_and_not: ~(P\/Q) -> ~P /\ ~Q.
+  Proof.
+    tauto.
+  Qed.
+
+  Lemma and_or_dist : P /\ (Q \/ R) <-> P /\ Q \/ P /\ R.
+  Proof.
+    tauto.
+  Qed.
+
+  Lemma and_not_not_impl: P /\ ~ Q -> ~(P -> Q).
+  Proof.
+    tauto.
+  Qed.
+
+  Lemma de_morgan1 : ~ (P \/ Q) -> ~P /\ ~Q.
+  Proof.
+    tauto.
+  Qed.
+
+  (* Reste de l'Exercice 9. *)
+
+  Lemma absorption_or: P \/ False <-> P.
+  Proof.
+    tauto.
+  Qed.
+
+  Lemma reductio_ad_absurdum: (P -> ~P) -> ~P.
+  Proof.
+    tauto.
+  Qed.
+
+  Lemma np_p_nnp: (~P -> P) -> ~~P.
+  Proof.
+    tauto.
+  Qed.
+
+End LJ.
+
+
+(*  Logique classique
+
+On peut sauter les 4 commandes suivantes 
+
+ *)
+
+Definition EXM :=   forall A:Prop, A \/ ~A.
+
+Ltac add_exm  A :=
+  let hname := fresh "exm" in
+  assert(hname : A \/ ~A);auto.
+
+Section LK.
+
+  Hypothesis  exm :  EXM.
+
+  (* 
+   Pour ajouter une instance du tiers-exclu de la forme  A \/ ~A 
+   il suffit d'exécuter la commande "add_exm A"
+   *)
+
+  Variables P Q R S T : Prop.
+
+  Lemma double_neg : ~~ P -> P.
+  Proof.
+    intro H.
+    add_exm  P. (* "je fais un tiers exclus sur P " *)
+    destruct exm0.
+    - assumption.
+    - assert (f:False).
+      {
+        apply H; assumption.
+      }
+      destruct f.
+   Qed.
+
+  (* Exercice: completer toutes les preuves, en remplaçant les "Admitted"
+     par des preuves terminées par "Qed."; et sans utiliser ni auto, ni tauto.
+   *)
+
+  Lemma de_morgan : ~ ( P /\ Q) <-> ~P \/ ~Q.
+  Proof.
+  Admitted.
+
+  Lemma not_impl_and : ~(P -> Q) <-> P /\ ~ Q.
+  Proof.
+  Admitted.
+
+  Lemma contraposee: (P -> Q) <-> (~Q -> ~P).
+  Proof.
+  Admitted.
+
+  Lemma exm_e : (P -> Q) -> (~P -> Q) -> Q.
+  Proof.
+  Admitted.
+
+  Lemma exo_16 : (~ P -> P) -> P.
+  Proof.
+  Admitted.
+
+  Lemma exo_17 : (P -> Q) \/ (Q -> P).
+  Proof.
+  Admitted.
+
+  Lemma imp_translation : (P -> Q) <-> ~P \/ Q.
+  Proof.
+  Admitted.
+
+  Lemma Peirce : (( P -> Q) -> P) -> P.
+  Proof.
+  Admitted.
+
+  Lemma test_lundi_1: (P->Q)->(~P->R)->(R->Q)->Q.
+  Proof.
+  Admitted.
+
+  Lemma test_lundi_2: (P \/ (Q\/R))-> (~P) -> (~R) -> (P\/Q).
+  Proof.
+  Admitted.
+
+  Lemma test_mercredi: (~P-> Q/\R)->(Q->~R)->P.
+  Proof.
+  Admitted.
+
+  Lemma test_vendredi: (~P->Q)->(~Q\/R)->(P->R)->R.
+  Proof.
+  Admitted.
+
+  Lemma test_g3: (P->Q)->(~P->~Q)->((P/\Q) \/ ~(P\/Q)).
+  Proof.
+  Admitted.
+
+  Lemma test_g3_2: (P->Q)->(~P->Q)->(Q->R)->R.
+  Proof.
+  Admitted.
+
+End LK.
+
+Section Club_Ecossais. (* version propositionnelle *)
+  Variables E R D M K: Prop.
+  (* Ecossais, chaussettes rouges, sort le dimanche, marie, kilt *)
+
+  Hypothesis h1: ~E -> R.
+  (* Tout membre non ecossais porte des chaussettes rouges *)
+  Hypothesis h2: M -> ~D.
+  (* Les membres maries ne sortent pas le dimanche *)
+  Hypothesis h3: D <-> E.
+  (* Un membre sort le dimanche si et seulement si il est ecossais *)
+  Hypothesis h4: K -> E /\ M.
+  (* Tout membre qui porte un kilt est ecossais et est marie *)
+  Hypothesis h5: R -> K.
+  (* Tout membre qui porte des chaussettes rouges porte un kilt *)
+  Hypothesis h6: E -> K.
+  (* Tout membre ecossais porte un kilt. *)
+
+  Lemma personne: False. (* Le club est vide! *)
+  Proof.
+  Admitted.
+  
+
+End Club_Ecossais.  
+  
+(** On peut sauter cette section *)
+
+Section Second_ordre.
+Definition PEIRCE := forall A B:Prop, ((A -> B) -> A) -> A.
+Definition DNEG := forall A, ~~A <-> A.
+Definition IMP2OR := forall A B:Prop, (A->B) <-> ~A \/ B.
+
+Lemma L2 : IMP2OR -> EXM.
+unfold IMP2OR, EXM.
+intros.
+ assert (~ A \/ A).
+ rewrite <- H. (* nouveau *)
+Admitted.
+
+
+
+Lemma L3 : EXM -> DNEG.
+  unfold DNEG , EXM.
+  intros.
+  add_exm A.
+Admitted.
+
+Lemma L4 : PEIRCE -> DNEG.
+unfold DNEG , PEIRCE.
+intros.
+split.
+intro. apply (H A False).
+intro.
+contradiction.
+auto.
+Qed.
+
+
+Lemma L5 : EXM -> PEIRCE.
+Proof.
+(*
+exact Peirce.
+Qed.
+ *)
+Admitted.
+End Second_ordre.
+
+(* tactiques nouvelles 
+*)
+  

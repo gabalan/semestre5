@@ -1,0 +1,72 @@
+package Point2D;
+
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Random;
+
+public class Planet extends Item{
+	private int numberSpaceShip;
+    private static transient Color saveLast =null  ;
+    private Color player;
+    private static int timeGenerate = 0;
+    public static transient Planet  firstGame = null;
+
+    //System.identityHashCode(this); give me uniq id of my object
+
+    /**
+     * allows to have the color of the player (of the planet)
+     * @return color of planet
+     */
+    public Color getPlayer() {
+        return player;
+    }
+
+    /**
+     * allows to have time for the generation of new planet
+     * @return int  time
+     */
+    public static int getTimeGenerate() {
+        return timeGenerate;
+    }
+
+    public static void setTimeGenerate(int timeGenerate) {
+        Planet.timeGenerate = timeGenerate;
+    }
+
+    public Planet(double x, double y, int w) {
+		super(x, y, w);
+    }
+
+    public Planet(double x, double y, int w, Color player) {
+        super(x, y, w);
+        this.player = player;
+    }
+
+    /**
+     * intelligently generate colors for planet or ship creation
+     * @return int corresponding of color
+  
+
+
+
+
+    public int getNumberSpaceShip() {
+        return numberSpaceShip;
+    }
+
+    @Override
+    public String toString() {
+        return "Planet Code:"+System.identityHashCode(this)+"  " +toStringColor(this.player)+" nbSpaceShip: "+this.numberSpaceShip;
+    }
+
+    /**
+     *can attack a planet if it does not have an attack in court or it just changes the goal
+     * @param objectiv cible of planet
+     * @param action allows to determine according to CRTL - ALT -SHIF the number of ships to send
+     */
+    
+}

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgame.a  game.o game_io.o
+/usr/bin/ranlib libgame.a

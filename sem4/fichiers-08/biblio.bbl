@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{diday-1982}
+E.~Diday, J.~Lemaire, J.~Pouget, and F.~Testu.
+\newblock {\em \'El\'ements d'analyse de donn\'ees}.
+\newblock Dunod, 1982.
+
+\bibitem{heckbert-1982}
+P.~Heckbert.
+\newblock Color image quantization for frame buffer display.
+\newblock In {\em Proceedings of SIGGRAPH'82}, pages 297--307, 1982.
+
+\bibitem{preparata-1988}
+F.~Preparata and M.~I. Shamos.
+\newblock {\em Computational geometry, an introduction}.
+\newblock Springer-Verlag, 1988.
+
+\bibitem{tutte-1963}
+W.T. Tutte.
+\newblock A census of planar maps.
+\newblock {\em Canad.J.Math.}, 15:249--271, 1963.
+
+\end{thebibliography}

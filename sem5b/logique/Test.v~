@@ -1,0 +1,46 @@
+Section Kaamelott.
+  Require Import Setoid.
+
+  Variable Personnage: Type.
+  Variables Breton Romain Hun : Personnage -> Prop.
+  Variables Chef : Personnage -> Personnage -> Prop. (*Chef x y : x est le chef de y*)
+  Variables Perceval Arthur Attila : Personnage.
+
+  Hypothesis un_Hun : forall x y : Personnage, Hun x /\ Hun y -> x = y.
+  Hypothesis BPerceval : Breton Perceval.
+  Hypothesis HAttila : Hun Attila.
+  Hypothesis CAttila : forall x : Personnage, Hun x -> Chef Attila x.
+  
+  Hypothesis Arturus_rex : forall x : Personnage, Breton x <-> Chef Arthur x.
+  Hypothesis le_monde_est_petit : forall x, Breton x \/ Romain x \/ Hun x.
+
+  Hypothesis HRB  : forall x,  ~ (Romain x /\ Breton x).
+  Hypothesis HRH  : forall x,  ~ (Romain x /\ Hun x).
+  Hypothesis HBH  : forall x,  ~ (Breton x /\ Hun x).
+
+  
+  Lemma Q1 : exists x, Chef x Perceval. 
+  Proof.
+  Admitted.
+
+  Lemma Q2 : forall x, Romain x -> ~Chef Arthur x.
+  Proof.
+  Admitted.    
+
+    
+  Lemma Q3 : exists x, ~Chef Arthur x.
+  Proof.
+  Admitted.
+
+ 
+
+  Lemma Q4 : forall x y, Hun x /\ Hun y-> Chef x y. 
+  Proof.
+  Admitted.
+ 
+
+  Lemma Q5 : forall x, x<>Attila /\ ~Chef Arthur x -> Romain x.  
+  Proof.
+  Admitted.    
+  
+End Kaamelott.

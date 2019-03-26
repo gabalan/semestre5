@@ -1,0 +1,360 @@
+
+%classe du document
+\documentclass[12pt]{report}
+
+%importation des packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[francais]{babel}
+\usepackage{listings}
+\usepackage{layout}
+\usepackage[top = 4.5cm, bottom = 4.5cm, right = 3.5cm, left = 3.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{moreverb}
+\begin{document}
+\begin{figure}
+\centering
+\includegraphics[width=0.3\textwidth]{recy2.png}
+\begin{verbatimtab}[10]
+		UNIVERSITE DE BORDEAUX 1
+\end{verbatimtab}
+\end{figure}
+%initialisation de la page de garde
+\title{PROJETS TECHNOLOGIQUES LICENCE 2 INFORMATIQUE\\RAPPORT DU PROJET}
+\author{		4TIN403U-\\ \bsc{GROUPE: TM4E}\\MEMBRES:\\Thierno Sambegou \bsc{DIALLO}\\Thierno Amadou \bsc{DIALLO}\\Hadja Fatoumata \bsc{DIAKITE}\\{Seylim \bsc{DJENG}}}
+\date{15 Avril 2017}
+
+%configuration de la citation de code
+\lstset{
+language = C,
+basicstyle = \scriptsize,
+numbers = left,
+numberstyle = \scriptsize,
+numbersep = 7pt,
+}
+
+%dÃ©but du rapport
+%\begin{document}
+
+%page de garde et table des matiÃ¨res
+\maketitle
+\tableofcontents
+\chapter{LE PROJET:}
+Le projet consiste Ã  rÃ©aliser un jeu appelÃ© \emph{Undead} en mode texte puis en mode graphique  et de son solveur.
+Pour le mode texte dans un premier temps on utilise une grille de longueur 4 et largeur 4 dont certaines cases sont  remplies par des MIRROIRS (/) et ANTIMIRROIRS (representÃ©s par antislash )et d'autres sont vides.Alors le but du jeu est de remplir chaque case de la grille qui ne contient pas de mirroir par un Zombie,un fantome ou un vampire.
+\begin{itemize}
+\item Les nombres de vampires/fantÃ´mes/zombies doiventÃªtre respectÃ©s.
+\item Les nombres autour de la grille indique combien de monstres sont visibles depuis le bordÂ :
+\item Les zombies sont toujours visibles
+\item  Les fantÃ´mes ne sont visibles quâ€™aprÃ¨s une rÃ©flexion dans au moins un miroir
+\item Les vampires ne sont pas visibles aprÃ¨s une rÃ©flexion dans un miroir
+\end{itemize}
+Dans un second temps le mode texte va evoluer avec cette fois ci une grille de longueur et largeur variables avec un nouveau type de monstre appelÃ© Spirit( qui n'est jamais visible) et deux types de mirroirs :
+mirroirs vertical(|) et horizontal(-).
+Enfin,il faudra juste adapter cette derniere version du mode texte en mode graphique avec le sdl2.
+
+Ce projet  permettra de savoir utiliser  les nombreux outils utiles et/ou nÃ©cessaires au dÃ©veloppement. Les outils de compilations \emph{Make} et \emph{CMake}. Les logiciels de gestions de version \emph{git}. Lâ€™outil de dÃ©bogage \emph{gdb} . Lâ€™outil de recherche des fuites mÃ©moires \emph{valgrind}. Lâ€™outil de couverture de code \emph{gcov} et l'importance des tests.
+En plus,il permet de s'adapter au travail en equipe.
+%P1C2
+
+\chapter{UNDEAD\_TEXT}
+\section{VERSION 1 avec taille de la grille 4*4}
+\subsection{fichier undead\_text.c}
+le fichier undead\_text.c implemente une fonction que nous avons appelÃ© \emph{int affichage(game jeu} qui remplit une grille avec des mirroirs et l'affiche.Il faut rappelÃ© que nous disposons d'une bibliothÃ¨que fournie par le professeur appelÃ© game.h qui contient toutes fonctions nÃ©cessaires Ã  l'implementation du jeu Ã  savoir:
+\begin{itemize}
+\item \emph{Une structure de type game ou cgame qui contient un jeu de type game}
+\item \emph{game new\_game()}:itinialise un jeu(grille 4*4)
+\item \emph{game setup\_new\_game(int *labels[NB\_DIR], content * board,
+		    int required\_nb\_ghosts,  int required\_nb\_vampires, int required\_nb\_zombies)}: qui implemente le setup du jeu.
+\item \emph{void add\_mirror(game game, int dir, int col, int line)}:qui ajoute un mirroir Ã  la position (col,line)
+\item \emph{void set\_required\_nb\_seen(game game, direction side, int pos, int value)}:ajoute le nombre de monstre visibles(value) sur un cotÃ© (side) Ã  la position(pos).
+\item \emph{void set\_required\_nb\_monsters(game game, content monster, int value)}:ajoute le nombre (value) d'un type de monstre donnÃ©(monster)
+\item \emph{game copy\_game (cgame g\_src)}:qui copie un jeu .
+\item \emph{void delete\_game (game g)}:qui supprime une grille si elle n'est plus utilisÃ©e(desallocation)
+\item \emph{int required\_nb\_seen(cgame game, direction side, int pos)}:retourne le nombre de monstre visibles sur un cotÃ© donnÃ© Ã  la position(pos).
+\item \emph{content get\_content(cgame game, int col, int line)}:retourne le contenu d'une case Ã  la position(col,line).
+\item \emph{int required\_nb\_monsters(cgame game, content monster)}:retourne le nombre de monstres d'un type dans donnÃ©.
+\item \emph{bool is\_game\_over (cgame g)}: retourne si la grille a Ã©tÃ© correctement remplie.
+\item \emph{void restart\_game(game g)}:permet de reprendre le jeu
+\item \emph{bool add\_monster(game game, content monster, int col, int line)}:ajoute un monstre et verifie ensuite si elle est rÃ©ellement ajoutÃ©
+\item \emph{int current\_nb\_seen(cgame game, direction side, int pos)}:retourne le nombre de monstre actuellement visible dans la grille Ã  partir d'un cotÃ© et une position donnÃ©s
+\item \emph{int current\_nb\_monsters(cgame game, content monster)}:retourne le nombre d'un type de monstre actuellement ajoutÃ© dans la grille
+\end{itemize}
+Avec ces fonctions,il suffit d'ajouter les monstres et les mirroirs.Pour jouer avec le terminal ,il faut lancer l'excutable generer(avec Makefile) puis on aura la forme:<x> <y> <G|V|Z>
+c'est Ã  dire mettre les cordonnÃ©es(x,y) oÃ¹ ajouter le montre soit Z(zombie),V(Vampire) ou G(Ghost).
+voici ce que doit ressembler le jeu avant et aprÃ¨s:
+\begin{verbatimtab}[10]
+ |   Z:5 V:2 G:2   |   Z:5 V:2 G:2   |
+ |                 |                 |
+ |     0 3 3 0     |     0 3 3 0     |
+ |                 |                 |
+ |  3  \     /  2  |  3  \ V V /  2  |
+ |  3  \        3  |  3  \ Z Z Z  3  |
+ |  2      \ /  0  |  2  Z G \ /  0  |
+ |  0  \     \  0  |  0  \ Z G \  0  |
+ |                 |                 |
+ |     0 3 2 3     |     0 3 2 3     |
+ |                 |                 |
+ |     start       |     solution    |
+\end{verbatimtab}
+\subsection{ fichier game.c}:
+Maintenant il nous est demandÃ© d'implementer nous nous meme les fonctions de la bibliothÃ¨que game.h qu'on nous avait pretÃ© dans un fichier appelÃ© \emph{game.c}.
+Nous avons choisit d'utiliser une structure game de la sorte
+\begin{verbatimtab}[10]
+typedef unsigned int uint;
+typedef struct game_s{
+    uint **labels;
+    content *board;
+    uint nb_Z;
+    uint nb_V;
+    uint nb_G;
+}game_s;
+typedef struct game_s* game;
+typedef enum content_e {EMPTY, MIRROR, ANTIMIRROR, VAMPIRE, GHOST, ZOMBIE} content;
+\end{verbatimtab}
+\begin{itemize}
+\item \emph{uint **labels}:c'est le tableau Ã  double dimension qui doit contenir les cases de la bordure de la grille pour stocker le nombre de monstre visibles sur un cotÃ© Ã  une position donÃ©e.
+\item \emph{content *board}:c'est la grille de 4*4
+\item \emph{nb\_Z}:le nombre de Zombie que contient le jeu
+\item \emph{nb\_V}:nombre de vampire.
+\item \emph{nb\_G}:nombre de Ghost.
+\end{itemize}
+Ensuite dans la fonction new\_game nous avons allouÃ© une variable de type game pour pouvoir initialisÃ© les champs de notre structure,et ensuite  implementer le reste des fonctions
+\begin{verbatimtab}[10]
+game new_game(){
+     game jeu = (game)malloc(sizeof(struct game_s));
+     if (jeu == NULL) {
+        fprintf(stderr, "error" );
+        exit(EXIT_FAILURE);
+     }
+     jeu -> nb_Z = 0;
+     jeu -> nb_V = 0;
+     jeu -> nb_G = 0;
+     jeu -> board = (content*)malloc(size*sizeof(content));
+     if (jeu -> board == NULL) {
+        fprintf(stderr, "error" );
+        exit(EXIT_FAILURE);
+     }
+     for (int i=0; i < size; i++){
+       jeu -> board[i] = EMPTY;
+     }
+     jeu -> labels =(uint**)malloc(NB_DIR*sizeof(uint *));
+     if (jeu -> labels == NULL) {
+        fprintf(stderr, "error" );
+        exit(EXIT_FAILURE);
+     }
+     for (int i = 0; i < NB\_DIR; i++){
+       jeu -> labels[i]=(uint *)malloc(NB\_DIR*sizeof(uint));
+       if (jeu -> labels[i] == NULL) {
+          fprintf(stderr, "error" );
+          exit(EXIT_FAILURE);
+       }
+     }
+     for (int x = 0; x < NB_DIR; x++){
+       for (int y = 0; y < NB_DIR; y++){
+         jeu -> labels[x][y] = 0;
+       }
+     }
+     return jeu;
+}
+\end{verbatimtab}
+AprÃ¨s dans l'implementation des fonctions ,le seul souci que nous avions eu c'est au niveau de la fonction is\_game\_over car nous n'avons pas bien implementer  la fonction
+current\_nb\_seen qui est appelÃ©e dedans.Mais nous l'avons corrigÃ© Ã  la deuxiÃ¨me pass.
+\subsection{les tests}
+Dans cette partie nous avons ecrit des fonctions qui testent est ce que rÃ©ellemnt les fonctions que nous avons implementÃ© dans game.c sont correctes sinon ils nous renvoient les erreurs rÃ©marquÃ©es.
+Ces tests sont repartis dans les fichiers testAm.c testSAM.c testSEY.c test\_DIAK.c .
+Chaque fichier de test est composÃ© d'une fonction \emph{main} exÃ©cutÃ©e au lancement de l'exÃ©cutable du test, comme celle-ci:
+\footnotesize
+\begin{verbatimtab}[10]
+int main(void){
+  bool result = true;
+  result = test_new_game_ext() && result;
+  result =  test_is_game_over () && result;
+  result = test_add_mirror_ext() && result;
+  result = test_copy_game() && result;
+  result = test_add_mirror_ext() && result;
+  result =  test_restart_game () && result;
+  result = test_game_width() && result;
+  result = test_game_height() && result;
+  result = test_add_monster() && result;
+  if(result){
+      printf("Tests successfull\n");
+      return EXIT_SUCCESS;
+  }
+  else{
+      printf("Tests failed\n");
+      return EXIT_FAILURE;
+  }
+}
+	\end{verbatimtab}
+\section{UNDEAD\_TEXT VERSION 2 avec taille variable}
+\subsection{Nouveau game.c}
+Avec cette version la taille de la grille change et on a un nouveau type de monstre (SPIRIT).
+Donc on reprend la structure et les fonctions precedentes de game.c en tenant compte cette fois ci des dimensions et des nouvelles fonctions .
+\begin{verbatimtab}[10]
+struct game_s{
+  int required_nb_ghosts;
+  int required_nb_vampires;
+  int required_nb_zombies;
+  int required_nb_spirits;
+  int height;
+  int width;
+  int ** required_nb_seen;
+  content * board;
+}
+\end{verbatimtab}
+\begin{itemize}
+\item \emph{int required\_nb\_ghosts}:nombre de ghost
+\item \emph{int required\_nb\_vampires}: nombre de vampire
+\item \emph{int required\_nb\_zombies}:nombre de zombies
+\item \emph{int required\_nb\_spirits}:nombre de spirits
+\item \emph{int height}:la hauteur de la grille
+\item \emph{int width}:la largeur de la grille
+\item \emph{int ** required\_nb\_seen}:tableaupour les bordures de la grille
+\item \emph{content * board}:la grille
+\end{itemize}
+Pour implementer cette nouvelle version,il faut adapter la precedente tout en sachant que cette fois ci deux autres types
+de mirroirs :les mirroirs vertical et horizontal.Dans la nouvelle bibliothÃ¨que game.h il y aussi des nouvelles fonctions
+comme: game\_height(game jeu) qui retourne la hauteur d'une grille de jeu passÃ©e en paramÃ¨tre et aussi game\_width(game) retourne la largeur.
+Comme la precedante nous avons eu certains problÃ¨mes d'allocation de memoire au niveau de la fonction new\_game\_ext pour allouer les bords de la grille(vue que les tailles varient ) mais nous l'avons reglÃ© avec le valgrind et les tests.
+En plus l'adaptation de la fonction current\_nb\_seen a Ã©tÃ© compliquÃ©e vu les nouveaux mirroirs,chose qui a affectÃ© aussi le is\_game\_over.
+\subsection{test et undead\_text.c}
+on a repris les tests precedants tout en testant aussi les nouveaux paramÃ¨tres apparus (mirrors et spirits).
+Pour un exemple de  undead\_text.c il suffit de faire appel en mettant les valeurs qu'on veut.exemple
+game jeu =new\_game\_ext(4, 4) et add\_mirror\_ext(game,ANTIMIRROR,0,2) pour la grille 4*4 donnÃ©e precedemment .
+\section{solveur}
+Dans cette partie,il fallait ecrire des fonctions qui chargent une grille Ã  partir d'un fichier ,trouvent soit une solution(FIND\_ONE) soit toutes les solutions(FIND\_ALL) soit le nombre de solutions (NB\_SOL) ensuite mettre la ou les solution(s) dans un ou des fichier(s)
+Pour generer l'executable (undeadd\_solve) on a utilisÃ© la methode Camke (CmakeList.text) .
+On le lance avec : undead\_solve FIND\_ONE|NB\_SOL|FIND\_ALL <nom\_fichier\_pb> <prefix\_fichier\_sol>
+nom\_fichier\_pb:fichier dans lequel se trouve la grille qu'il faut charger
+prefix\_fichier\_sol>:lÃ  oÃ¹ il faut mettre la /les solution(s).
+\subsection{le fichier game\_io.c}:
+Dans ce fichier on a implementÃ© deux fonctions :load\_game qui charge le jeu depuis le fichier et save\_game qui sauvegarde la solution dans un ou des fichier(s)
+\begin{itemize}
+\item \emph{game load\_game(char* filename)}: prend en paramÃ¨tre un fichier.
+Pour l'implementer nous avons utilisÃ© deux fonctions auxiliaires \emph{char* read\_next\_line(FILE* p\_f, long* p\_size)} qui permet de lire une ligne dans un fichier
+puis de stocker chaque caractere(meme les espaces) dans une case d'un tableau et retourne ensuite ce tableau de caractere(
+tableau que nous avons allouer dynamiquement)  ,ensuite \emph{long* convert\_line(char* line, long* p\_size)} qui convertit un tableau de caracteres en un tableau d'entier de taille p\_size
+(sans tenir compte des espaces) et retourne ce tableau;
+puisque qu'il faut lire doit avoir un format fixe ,c'est Ã  dire les 6 prÃ¨mieres lignes sont des des entiers qui sont la la hauteur,la largeur,le nombre de chaque type de
+monstre et les nombres de monstres visibles sur les bords(donc lÃ  on peut lire et convertir) et les autres lignes sont des caractÃ¨res(mirroirs et cases vides donc ici on lit juste les lignes).
+\begin{verbatimtab}[10]
+VOICI LE FORMAT:
+
+<width> <height>
+<required_nb_vampires>  <required_nb_ghosts> <required_nb_zombies> <required_nb_spirits>
+<labels[n][0]> <labels[n][1]> ... <labels[n][width-1]>
+<labels[s][0]> <labels[s][1]> ... <labels[s][width-1]>
+<labels[e][0]> <labels[e][1]> ... <labels[e][height-1]>
+<labels[w][0]> <labels[w][1]> ... <labels[w][height-1]>
+<board[0][height-1]> <board[1][height-1]> ... <board[width-1][height-1]>
+...
+<board[0][1]> <board[1][1]> ... <board[width-1][1]>
+<board[0][0]> <board[1][0]> ... <board[width-1][0]>
+\end{verbatimtab}
+\item \emph{void save\_game(cgame g, char* filename)}: cette fonction c'est apres avoir lancer le solver si on
+on trouve une/des solution(s) elles les stockent dans un/des fichier(s) sinon elle ecrit juste "pas de solution"
+\end{itemize}
+\subsection{fichier solver.c}
+Le principe que nous avons utilisÃ© est le suivant:en partant de l'inittialisation d'un jeu avec le load\_game nous avons testÃ© tous les
+deplacements possibles Ã  l'aide de la fonction is\_game\_possible que nous avons ecrite et qui vÃ©rifie si on peut placer le monstre en question Ã  la position indiquÃ©e si oui on le place
+ sinon on fait marche arriÃ¨re .Ensuite  on verifie avec la fonction is\_game\_over si le jeu terminÃ© sinon on teste d'autres possibilitÃ©s.
+Le grand problÃ¨me avec une telle methode est qu'elle demande Ã©normÃ©ment de memoire mais elle reste efficace.
+la fonction qui trouve une solution on l'a appelÃ© sol\_recursive.
+bool sol\_recursive(game jeu, int position, bool retour):elle commence Ã  chercher Ã  une position donnÃ©(position) et cherche toutes les possibilitÃ©s et si elle trouve une solution elle retourne
+True(Vrai) sinon False(FAUX).
+C'est exactement la meme fonction fonction que nous avons utilisÃ© pour le FIND\_ONE en passant en parametre le jeu  ensuite 0 comme
+position de depart et False(car pour un debut on a aucune solution)  :bool s=sol\_recursive(jeu,0,false);
+Le FIND\_ALL:on a appelÃ© aussi la sol\_recursive une fois et si c'est true alors on l'appelle encore avec po
+pour position=longueur*largeur-1. on cherche une/des autres possibles la fonction sol\_recursive
+mais cette fois avec comme condition "continue Ã  chercher tant que tu trouve de solutions" traduction(while(s==true))
+\chapter{UNDEAD\_SDL}
+\section{Les difficultÃ©s rencontrÃ©es}
+Le but de cette derniÃ¨re partie Ã©tait de rÃ©aliser l'interface graphique de notre jeux Undead . Cette partie Ã©tait impressionnante au premier abord . On ne savait pas vraiment comment s'y prendre car on Ã©tait pas familier avec  la SDL . Les fichiers fournis pour nous aider furent alors trÃ¨s utile, Aussi avant de passer Ã  l'interface graphique on a de nouveau eu un bug sur notre fonction current\_nb\_seen que l'on Ã  malheureusement pas pu corriger , cependant on avait la possibilitÃ© d'utiliser des game.o et game.io fonctionnels, c'est donc en utilisant ceux ci  que nous avons pu mener Ã  bien l'interface graphique.En plus nous avons quelques  problemes de fuites de memoires dans la grille graphique pourtant nous avons liberÃ© toutes les (SDL\_Texture*) que nous avons allouÃ© dans la structure.
+\section{la structure de SDL2}
+\begin{verbatimtab}[10]
+
+struct Env_t {
+  SDL_Texture * background;
+  SDL_Texture * zombie;
+  SDL_Texture * ghost;
+  SDL_Texture * vampire;
+  SDL_Texture * spirits;
+  SDL_Texture * point;
+  SDL_Texture * textV;
+  SDL_Texture * textG;
+  SDL_Texture * textZ;
+  SDL_Texture * textS;
+  SDL_Texture * text;
+  SDL_Texture * textR;
+  SDL_Texture * textprincipe;
+  SDL_Texture * textsolveur;
+  int zombie_x, zombie_y;
+  int ghost_x, ghost_y;
+  int vampire_x, vampire_y;
+  int spirit_x, spirit_y;
+  int point_x, point_y;
+  int i , j;
+  game g;
+};
+\end{verbatimtab}
+\section{Les fonctions}
+
+Dans laquelle nous avons dÃ©fini les diffÃ©rentes textures et  variables pour ainsi pouvoir les utilisÃ© dans tout le code , car la consigne Ã©tais de ne pas utiliser de variable globale , pour avoir un code assez propre et clair. Ce fut la premiÃ¨re Ã©tape , Ã©videment notre structure ne ressemblait pas Ã  Ã§a au tout dÃ©but , nous avons rajoutÃ© les Ã©lÃ©ments au fur et Ã  mesure en fonction de nos besoins .
+
+\subsection{Fonction InitÂ :}
+Cette fonction comme son nom l'indique avait pour but d'initialiser les diffÃ©rentes textures que ce soit  le background ou encore les monstres ils furent tous initialisÃ© dans cette fonction .  Nous avons ainsi utilisÃ© des Â«Â IMG\_load\_textureÂ Â» pour charger les diffÃ©rentes images. Nous avons eu un lÃ©ger soucis au niveau de l'affichage des required\_nb\_seen , car ces fonctions nous retournaient des entiers , il fallut donc les convertir en caractÃ¨re  pour pouvoir ainsi utiliser les fonctions
+ Â«Â TTF\_RenderText\_BlendedÂ Â» et Â«Â SDL\_createTextureFromSurfaceÂ Â» nous permettant  alors de crÃ©er des textures pour pour les entiers required\_nb\_seen .
+
+\subsection{ Fonction Render:}
+C'est cette fonction qui permet l'affichage de tout ce qui fut initialisÃ© dans la fonction init, C'est aussi dans cette fonction que l'on a dÃ©fini notre grille, ce fut pour nous la partie la plus compliquÃ©. Faire une grille en soit n'Ã©tait pas si complexe mais c'est plutÃ´t le fait de faire une grille capable de s'adapter en fonction du fichier de jeu donnÃ© en paramÃ¨tre qui fut rÃ©ellement complexeÂ . Mais une fois ce problÃ¨me rÃ©solu et la bonne formule trouvÃ©e , le reste du projet ne sembla plus si compliquÃ©Â . 
+
+\subsection{Fonction Process:}
+c'est dans cette fonction que l'on gÃ¨re les Ã©vÃ©nements de la souris et du clavier , c'est grÃ¢ce Ã  celle ci que l'on peut jouer au jeux en question. Notre stratÃ©gie Ã  Ã©tÃ© d'utiliser le clavier pour jouer , on a placer un curseur qui commence en bas Ã  gauche de la grille et lorsque l'on appui sur les touches up , down , left ou right ce curseur passe a la case suivante suivant la direction indiquÃ©. On Ã  alors placÃ© des curseurs x et y qui Ã©volue en mÃªme temps que le curseur prÃ©sent dans la grilleÂ , ainsi lorsque le curseur monte y = y + 1 , lorsqu'il descend , y = y - 1  , lorsqu'il va Ã  gauche, x = x- 1 et enfin lorsqu'il va Ã  droite x = x + 1. Ensuite selon que l'on appui sur V , G , Z ou S , un add\_monster du monstre indiquÃ© est utilisÃ© pour l'ajouter dans la grille aux coordonnÃ©es x , y correspondentÂ  voir figure (\ref{fig:ppp} ).
+
+ \subsection{Fonction clean :}
+Elle permet de vider le jeux et ainsi Ã©viter les fuites mÃ©moires.\\
+\section{le role des boutons:}
+\begin{itemize}
+\item \emph{Restart}:permet de reprendre le jeu.
+\item \emph{solveur}:retourne le solveur c'est Ã  dire la solution immediatement
+\item \emph{About}:Pour savoir a propos du jeu.ET sur ce bouton nous avons esseyer de le faire fonctionner mais nous n'avons pas pu.
+\end{itemize}
+Pour se deplacer dans la grille sdl on utilise les 4 touches du clavier(HAUT,BAS,GAUCHE,DROITE) et en meme temps la petite souri sur l'ecran nous 
+montre dans quelle cellule on est.Quand le jeu termine Ã§a affiche you "CONGRUTALATION WIN" ~\ref{fig:grillef}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{ppp.png}
+\caption{\label{fig:ppp} Commment jouer?}
+\end{figure}
+\chapter{ANNEXE:}
+LES COMMENTAIRES DE MEMBRES Ã€ PROPOS DE L'UE:
+\section{Conclusion de Thierno Sambegou Diallo:}
+Dans l'ensemble cette UE a Ã©tÃ© une veritable experience pour moi car chaque partie du projet pousse l'Ã©tudiant Ã  faire des recherches ,des analyses profondes d'evÃ¨nement.La decouverte des outils (cmake,makefile,valgrind....) et leurs utilisations va nous faciliter pour la rÃ©alisation d'autres projets individuels.
+Par contre,je trouve un peu severe le systeme de correction qui par exemple pour notre groupe,nous a donÃ© 0 Ã  cause d'une seule  fonction ratÃ©e (cas: solveur premier rendu qui fonctionnait bien chez mais certainement lui il avait des soucis avec nous fonctions auxiliaires qui lis te convertis une ligne) ou encore parcequ'on a mis un espace de trop dans le Makefile ou parcequ'il n y a pas nommer les fonctions comme le veut le prof.Et d'un coup le groupe se retrouve avec 0,chose qui dessoit evidemment parcequ'on a l'impression qu'on a rien foutu du tout.Meme s'il y a l'idÃ©e de la deuxieme pass mais c'est un petit peu decevant de voir que c'est Ã  la deuxieme tentative que tu reussis Ã  cause juste d'un espace.\\
+\section{Conclusion de Seylim DIENG:}
+j'ai trouvÃ© cette Ue assez bien dans l'ensemble , j'ai bien aimÃ© le systÃ¨me de rendu rÃ©gulier , ce fut une bonne mÃ©thode de suivi pour nous , nous permettant ainsi de ne pas prendre trop de retardÂ . Il y a eu cependant des problÃ¨mes embÃªtant concernant ces rendus , notamment les bugs des systÃ¨mes de corrections automatiques , certaines fois le rÃ©sultat attendu n'Ã©tait pas faux mais il arrivait que l'on reÃ§oive un 0 sans savoir pourquoiÂ . Heureusement cependant les professeurs Ã©taient Ã  l'Ã©coute et rÃ©glaient assez vite le problÃ¨me. Ã€ part Ã§a j'ai trouvÃ© le suivi trÃ¨s bien , le forum sur l'ent nous permettant de poser nos questions fut aussi trÃ¨s utile pour remÃ©dier Ã  nos problÃ¨mes. En conclusion je dirai que ce fut une bonne expÃ©rience et utile car je maÃ®trise dorÃ©navant bon nombre d'outil de programmationÂ .
+\section{Conclusion de Thierno Amadou Diallo:} 
+cette UE a Ã©tÃ© d'une importance capitale pour moi car elle m'a permise d'apprendre non seulement des notions sur un langage que je n'avais jamais vu au paravant : le langage C et plusieurs outils trÃ¨s importants dans la programmation.Les outils de debuggage comme le gdb,valgrind mais aussi des outils d'optimisation de code. elle m'a aussi permit de travailler en groupe c'est qui n'est vraiment pas facile sans le git.En conclusion, apart quelques problemes rencontrÃ©s sur certains de nos rendu je trouve bien cette UE et j'esperes tirer profit sur tout ce qu'on a vu durant cette annÃ©e.
+\section{conclusion de Hadja Fatoumata:}
+Tout dâ€™accord ce cours mâ€™a permis de comprendre comment fonctionne  le systÃ¨me dâ€™exploitation linux , connaitre les lignes de commandes permettant dâ€™exÃ©cuter une programme. Le cours de projet technologique mâ€™a aussi permis de connaitre les bases prÃ©liminaires de la programmation en langage C, de combler mes lacune dans lâ€™Ã©criture des algorithmes programmations c, chaque fonction coder dans ce projet mâ€™a appris un peu plus et lâ€™intÃ©rÃªt quâ€™avoir de travailler en groupe de ce partager les idÃ©es mâ€™a permis de comprendre lâ€™intÃ©rÃªt quâ€™Ã  avoir de travailler en Ã©quipe.
+Cette UE mâ€™a permis de comprendre quâ€™un projet ne se limite pas au fait que les codes fonctionnent ou que le jeu fonctionne mais aussi Ã  penser Ã  tester tous les fonctions utiliser pour faire le code  qui a permis Ã  concevoir  le jeu.
+Les fonctions solveur malgrÃ© quâ€™elles nâ€™ont pas Ã©tÃ© facile Ã  programmer car elles ont fait preuves dâ€™une grande rÃ©flexion ce qui nous a dâ€™ailleurs couter en temps et aussi en points  car on nâ€™a pas rÃ©ussi Ã  Termier les fonctions Ã  temps, mais elles nous aider Ã  comprendre lâ€™intÃ©rÃªt quâ€™a dâ€™avoir le solveur, dÃ©jÃ  ce plier au caprice du client, pour un jeu un client pourrai bien ce demander si le jeux admet bien une solution ou pas ou bien dâ€™autre chose et un programme doit pouvoir satisfaire tous les caprices du clients et câ€™est bien le travail complet qui attend un programmeur
+Lâ€™interface graphique avec SDL des fonctions de programmations encore nouveau pour moi mais qui mâ€™a beaucoup marquÃ© et  beaucoup apprÃ©ciÃ©  et dont je crois quâ€™il est dâ€™une grande importance dans la programmation car il mâ€™a servi Ã  comprendre comment transformer un programme en interfaces graphiques avec lâ€™aide de toutes ces petites fonctions qui nous permet dâ€™avoir toutes sortes de style dâ€™interfaces a notre convenances . le SDL les lâ€™une des fonctions qui mâ€™a beaucoup plus marquer dans ce cours
+Le cours de projet technologique est lâ€™une des UE les plus indispensables du semestre car il nous  enseigne pas seulement les bases de la programmations mais aussi il nous forme Ã  devenir un bon programmeur avec tous les atouts dont on aura besoins a lâ€™avenirs et  sâ€™a serai  bien que Ã§a soit une suite continuelle car elle nous servira en nous perfectionner de plus.\\
+\section{EXEMPLES:\\Une grille vide fig \ref{fig:grille} et cette grille aprÃ¨s avoir Ã©tÃ© bien remplit fig \ref{fig:grillef}}
+\begin{figure}
+\centering
+\includegraphics[width=1.2\textwidth]{grille.png}
+\caption{\label{fig:grille} Exemple d'une grille}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{grillef.png}
+\caption{\label{fig:grillef} Grille Apres avoir gagnÃ©}
+\end{figure}
+\end{document}
+

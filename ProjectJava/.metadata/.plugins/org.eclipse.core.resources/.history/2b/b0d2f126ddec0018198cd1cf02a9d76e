@@ -1,0 +1,63 @@
+package alien;
+
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
+import javafx.scene.shape.Rectangle;
+
+public class Galaxie extends Application{
+	public static String getRessourcePathByName(String name) {
+		return Game.class.getResource('/' + name).toString();
+	}
+
+	private int score;
+	private final static int WIDTH = 600;
+	private final static int HEIGHT = 600;
+	
+	public void start(Stage primaryStage) {
+		 
+        Rectangle rectangle = new Rectangle();
+        rectangle.setX(20);
+        rectangle.setY(50);
+        rectangle.setWidth(200);
+        rectangle.setHeight(150);
+        rectangle.setFill(Color.BISQUE);
+ 
+        Group root = new Group();
+        Canvas canvas = new Canvas(WIDTH, HEIGHT);
+		root.getChildren().add(canvas);
+
+		GraphicsContext gc = canvas.getGraphicsContext2D();
+		gc.setFont(Font.font("Helvetica", FontWeight.BOLD, 24));
+		gc.setFill(Color.BISQUE);
+		gc.setStroke(Color.RED);
+		gc.setLineWidth(1);
+		Image space = new Image(getRessourcePathByName("images/space.jpg"), WIDTH, HEIGHT, false, false);
+
+        
+  
+        Scene scene = new Scene(root, WIDTH,HEIGHT,Color.WHITE);
+        primaryStage.setTitle("GALAXIE");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+ 
+    public static void main(String[] args) {
+        Application.launch(args);
+    }
+}

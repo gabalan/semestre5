@@ -1,0 +1,1 @@
+gcc  -std=c99 -g -Wall   CMakeFiles/test_DIAK.dir/test_DIAK.c.o CMakeFiles/test_DIAK.dir/game.c.o CMakeFiles/test_DIAK.dir/game_io.c.o  -o test_DIAK -rdynamic libgame.a 

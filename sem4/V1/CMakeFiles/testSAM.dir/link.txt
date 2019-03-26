@@ -1,0 +1,1 @@
+/usr/bin/cc  -std=c99 -g -fprofile-arcs -ftest-coverage -Wall   CMakeFiles/testSAM.dir/testSAM.c.o CMakeFiles/testSAM.dir/game.c.o CMakeFiles/testSAM.dir/game_io.c.o  -o testSAM -rdynamic libgame.a 

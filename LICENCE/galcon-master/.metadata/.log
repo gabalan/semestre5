@@ -1,0 +1,64 @@
+!SESSION 2017-12-05 15:44:56.538 -----------------------------------------------
+eclipse.buildId=4.7.0.I20170612-0950
+java.version=1.8.0_152
+java.vendor=Oracle Corporation
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=fr_FR
+Framework arguments:  -product org.eclipse.epp.package.java.product
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -product org.eclipse.epp.package.java.product
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-05 15:45:24.735
+!MESSAGE The debug port 9000 is in use. Please select a different port for the debugger.
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-05 15:45:24.754
+!MESSAGE Could not open a broadcast port on: 20080 (port might be in use). Please select a different port number
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-05 15:45:24.757
+!MESSAGE The debug port 10137 is in use. Please select a different port for the debugger.
+!SESSION 2017-12-08 09:53:31.594 -----------------------------------------------
+eclipse.buildId=4.7.0.I20170612-0950
+java.version=1.8.0_152
+java.vendor=Oracle Corporation
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=fr_FR
+Framework arguments:  -product org.eclipse.epp.package.java.product
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -product org.eclipse.epp.package.java.product
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-08 09:53:56.917
+!MESSAGE The debug port 9000 is in use. Please select a different port for the debugger.
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-08 09:53:56.946
+!MESSAGE Could not open a broadcast port on: 20080 (port might be in use). Please select a different port number
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-08 09:53:56.949
+!MESSAGE The debug port 10137 is in use. Please select a different port for the debugger.
+!SESSION 2017-12-08 09:54:20.185 -----------------------------------------------
+eclipse.buildId=4.7.0.I20170612-0950
+java.version=1.8.0_152
+java.vendor=Oracle Corporation
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=fr_FR
+Framework arguments:  -product org.eclipse.epp.package.java.product
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -product org.eclipse.epp.package.java.product
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-08 09:55:00.450
+!MESSAGE The debug port 9000 is in use. Please select a different port for the debugger.
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-08 09:55:00.496
+!MESSAGE Could not open a broadcast port on: 20080 (port might be in use). Please select a different port number
+
+!ENTRY org.eclipse.php.debug.core 4 4 2017-12-08 09:55:00.500
+!MESSAGE The debug port 10137 is in use. Please select a different port for the debugger.
+
+!ENTRY org.eclipse.ui.ide 4 0 2017-12-08 09:56:10.644
+!MESSAGE Could not import project located at /autofs/netapp/account/cremi/adiallo004/Bureau/galcon-master
+!STACK 0
+org.eclipse.ui.internal.wizards.datatransfer.CouldNotImportProjectException: Could not import project located at /autofs/netapp/account/cremi/adiallo004/Bureau/galcon-master
+	at org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob.toExistingOrNewProject(SmartImportJob.java:557)
+	at org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob.run(SmartImportJob.java:250)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:56)
+Caused by: org.eclipse.core.internal.resources.ResourceException: Invalid project description.
+	at org.eclipse.core.internal.resources.Project.checkDescription(Project.java:169)
+	at org.eclipse.core.internal.resources.Project.assertCreateRequirements(Project.java:53)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:263)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:247)
+	at org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob.createOrImportProject(SmartImportJob.java:596)
+	at org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob.toExistingOrNewProject(SmartImportJob.java:544)
+	... 2 more

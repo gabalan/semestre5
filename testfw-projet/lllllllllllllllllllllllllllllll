@@ -1,0 +1,310 @@
+#define _GNU_SOURCE
+#include <stdbool.h>
+#include <stdio.h>
+#include<stdlib.h>
+#include<dlfcn.h>
+#include<string.h>
+#include "testfw.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <setjmp.h>
+#include<sys/time.h>
+#include <sys/time.h>
+#define CAPACITY 1000  //capacitÃƒÂ© du tableau de tests
+
+/* ********** STRUCTURES ********** */
+
+struct testfw_t
+{
+  char *program;
+  int timeout;
+   char *logfile;
+    char *cmd;
+     bool silent;
+      bool verbose;
+      struct test_t** tab;//tableau de tests.
+      unsigned int capacity; //capacity du tableau tab qui peut augmenter si besoin
+      int size;// le nombre de tests actuellement enregistrer dans le tableau de test
+};
+/*extraire une sous_chaine de caractere dans une chaine de caracteres
+*src.Debut de la chaine Ãƒ  extraire :pos  et la taille est len.*/
+
+char *substr(char *src,int pos,int len){
+  char *dest=NULL;
+  if (len>0) {
+    dest = calloc(len+1, 1);
+    if(NULL != dest) {
+        strncat(dest,src+pos,len);
+    }
+  }
+  return dest;
+}
+/* ********** FRAMEWORK ********** */
+
+struct testfw_t *testfw_init(char *program, int timeout, char *logfile, char *cmd, bool silent, bool verbose)
+{
+    //allocation de la structure;
+  struct testfw_t * fw=(  struct testfw_t*)malloc(sizeof( struct testfw_t));
+ if (fw==NULL){
+   fprintf(stderr," ERROR: allocation of  struct testfw_t\n ");
+   exit(EXIT_FAILURE);
+ }else{
+   fw->timeout=timeout;
+   fw->logfile=logfile;
+   fw->silent=silent;
+   fw->verbose=verbose;
+   fw->cmd=cmd;
+   fw->program=program;
+   //allocation du tableau de test.
+   fw->tab=(struct test_t**)malloc(CAPACITY*sizeof(struct test_t*));
+   if(fw->tab==NULL){
+     fprintf(stderr,"ERROR:allocation of test_t**" );
+     exit(EXIT_FAILURE);
+   }
+   fw->capacity=CAPACITY;
+   fw->size=0;
+ }
+ return fw;
+}
+
+void testfw_free(struct testfw_t *fw)
+{
+  if (fw==NULL){
+   fprintf(stderr," free of testfw_t* ");
+   exit(EXIT_FAILURE);
+ }else{
+   if(fw->tab!=NULL){
+     for(int i=0;i<fw->size;i++){
+       if(fw->tab[i]){
+           if(fw->tab[i]->name){
+                free(fw->tab[i]->name);
+           }
+           if(fw->tab[i]->suite){
+             free(fw->tab[i]->suite);
+           }
+        free(fw->tab[i]);
+       }
+     }
+     free(fw->tab);
+   }
+   free(fw);
+ }
+}
+
+int testfw_length(struct testfw_t *fw)
+{
+  if (fw==NULL){
+    fprintf(stderr," fw in testfw_length ");
+    exit(EXIT_FAILURE);
+  }
+  return fw->size;
+}
+
+struct test_t *testfw_get(struct testfw_t *fw, int k)
+{
+  if (fw==NULL || fw->tab==NULL || fw->tab[k]==NULL ){
+    fprintf(stderr,"ERROR:testfw_get\n ");
+    exit(EXIT_FAILURE);
+  }
+  if (k>=fw->size){
+    fprintf(stderr,"ERROR:%d greater than the number of tests recorded\n ",k);
+    exit(EXIT_FAILURE);
+  }
+  return fw->tab[k];
+}
+
+/* ********** REGISTER TEST ********** */
+
+struct test_t *testfw_register_func(struct testfw_t *fw, char *suite, char *name, testfw_func_t func)
+{
+  if (fw==NULL){
+   fprintf(stderr," ERROR: testfw_register_func\n ");
+   exit(EXIT_FAILURE);
+ }
+ if(fw->size>=fw->capacity){
+   fw->tab=(struct test_t**)realloc(fw->tab,2*(fw->capacity)*sizeof(struct test_t*));
+   fw->capacity=2*(fw->capacity);
+   if(fw->tab==NULL){
+     fprintf(stderr, "ERROR:realloc in testfw_register_func\n");
+     exit(EXIT_FAILURE);
+   }
+ }
+ struct test_t* t=(struct test_t*)malloc(sizeof(struct test_t));
+ if (t==NULL){
+   fprintf(stderr,"  struct test_t ");
+   exit(EXIT_FAILURE);
+ }
+ int len_name=strlen(name);
+ char*name1=substr(name,0,len_name);
+ int len_suite=strlen(suite);
+ char*suite1=substr(suite,0,len_suite);
+ t->suite=suite1;
+ t->name=name1;
+ t->func=func;
+ fw->tab[fw->size]=t;
+ fw->size+=1;
+ return t;
+}
+
+struct test_t *testfw_register_symb(struct testfw_t *fw, char *suite, char *name)
+{
+  if (fw==NULL){
+    fprintf(stderr,"  struct testfw_t ");
+    exit(EXIT_FAILURE);
+  }
+
+  void *plugin = dlopen (NULL, RTLD_NOW);
+
+  if (!plugin)
+    {
+      fprintf(stderr, " dlopen %s (%s)\n",dlerror(), fw->program);
+      exit(EXIT_FAILURE);
+    }
+  char *cmd;
+  asprintf(&cmd,"%s_%s",suite,name);
+  struct test_t * t;
+
+    testfw_func_t (func_pr);
+     func_pr = dlsym(plugin,cmd);
+    if(func_pr){
+      t=testfw_register_func(fw, suite, name, func_pr);
+    }else{
+    fprintf(stderr, " dlsym %s\n",dlerror());
+      dlclose(plugin);
+      exit(EXIT_FAILURE);
+    }
+        free(cmd);
+        dlclose(plugin);
+        return t;
+}
+
+int testfw_register_suite(struct testfw_t *fw, char *suite)
+{
+   int compteur=0;
+  if(fw==NULL){
+    exit(EXIT_FAILURE);
+  }
+  char *cmd;
+  asprintf(&cmd,"nm --defined-only %s | cut -d ' ' -f 3 | grep ^%s_ | cut -d '_' -f 2",fw->program,suite);
+  FILE* file=popen(cmd,"r");
+  if(file==NULL){
+    fprintf(stderr, "echec de l'ouverture du fichier **popen**\n" );
+    exit(EXIT_FAILURE);
+  }
+  char chaine[CAPACITY];
+   while (fgets(chaine,CAPACITY,file)!=NULL) {
+    char *name=strtok(chaine,"\n");
+    struct test_t *t=testfw_register_symb(fw,suite,name);
+    if(t!=NULL)
+      compteur+=1;
+  }
+  free(cmd);
+  pclose(file);
+  return compteur;
+}
+
+
+void handler(int sig){
+exit(sig);
+}
+int testfw_run_all(struct testfw_t *fw, int argc, char *argv[], enum testfw_mode_t mode)
+{
+
+
+
+    switch (mode) {
+      case TESTFW_FORKS:
+        {
+            int file=1;
+            if(fw->logfile!=NULL){
+              file=open(fw->logfile,O_WRONLY| O_CREAT|O_TRUNC,0644);
+              printf("file ok  %d\n",file );
+            }
+            int status;
+            if(fw==NULL)
+            {
+              fprintf(stderr, "%s\n","Error" );
+              exit(EXIT_FAILURE);
+            }
+            pid_t pid;
+            int compteur=0;
+            struct timeval debut,end;
+            FILE*dest;
+            for(int i=0;i<fw->size;i++){
+              gettimeofday(&debut,NULL);
+              if((pid=fork())==0)
+              {
+                if(fw->cmd!=NULL){
+                  dest=popen(fw->cmd,"w");
+                  file=fileno(dest);
+                }
+                dup2(file,1);
+                dup2(file,2);
+                struct sigaction act;
+                act.sa_handler = handler;
+                act.sa_flags = 0;
+                sigemptyset(&act.sa_mask);
+                sigaction(SIGALRM, &act, NULL);
+                alarm(0);
+                alarm(fw->timeout);
+                int ret=fw->tab[i]->func(argc,argv);
+                exit(ret);
+              }else
+              {
+                wait(&status);
+                gettimeofday(&end,NULL);
+                int pclose_ret;
+                if(fw->cmd!=NULL){
+                  pclose_ret=plcose(dest);
+                }
+                if(fw->silent==true)
+                {
+                  close(1);
+                  close(2);
+                }
+                if(fw->verbose)
+                {
+                  close(2);
+                }
+                float time_final=(end.tv_sec-debut.tv_sec)*1000+(end.tv_usec-debut.tv_usec)/(float)1000;
+                if (WIFEXITED(status)) {
+                  int retour=WEXITSTATUS(status);
+                  if(retour==0)
+                  printf("[SUCCESS] run test \"%s.%s\" in %.2f ms ( status 0) \n", fw->tab[i]->suite,fw->tab[i]->name,time_final);
+                  else  if(retour==1)
+                  {
+                    compteur+=1;
+                    printf("[FAILURE] run test \"%s.%s\" in %.2f ms ( status 1) \n", fw->tab[i]->suite,fw->tab[i]->name,time_final);
+                  }
+                  else if(retour==14)
+                  {
+                    compteur+=1;
+                    if(time_final>=fw->timeout*1000)
+                    {
+                      printf("[TIMEOUT] run test \"%s.%s\"  in %.2f ms ( status 124) \n", fw->tab[i]->suite,fw->tab[i]->name,time_final);
+                    }else
+                    {
+                      printf("[KILLED] run test \"%s.%s\"  in %.2f ms ( signal \"%s\") \n", fw->tab[i]->suite,fw->tab[i]->name,time_final, strsignal(retour));
+                    }
+                  }
+                } else if (WIFSIGNALED(status))
+                {
+                  compteur+=1;
+                  printf("[KILLED] run test \"%s.%s\"  in %.2f ms ( signal \"%s\") \n", fw->tab[i]->suite,fw->tab[i]->name,time_final, strsignal(WTERMSIG(status)));
+                }
+              }
+
+            }
+            return compteur;
+          }
+      case TESTFW_NOFORK:
+            break;
+      case TESTFW_FORKP:
+      break;
+    }
+
+  }

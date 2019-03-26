@@ -1,0 +1,1 @@
+/usr/bin/cc  -std=c99 -g -fprofile-arcs -ftest-coverage -Wall   CMakeFiles/undead_sdl2.dir/main.c.o CMakeFiles/undead_sdl2.dir/undead_sdl2.c.o CMakeFiles/undead_sdl2.dir/solver.c.o game.o game_io.o  -o undead_sdl2 -rdynamic -lSDL2 -lSDL2_image -lSDL2 -lSDL2_ttf -lSDL2 -lm -lSDL2_image -lSDL2_ttf -lm 

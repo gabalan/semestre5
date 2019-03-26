@@ -1,0 +1,20 @@
+INDEX VERSION 1.130+/autofs/unityaccount/cremi/tsdiallo001/Bureau/ProjectJava/.metadata/.plugins/org.eclipse.jdt.core
+3632697843.index
+1609666147.index
+3315680087.index
+1799457170.index
+2657583375.index
+3033028704.index
+1446085174.index
+2089348824.index
+3632288219.index
+2992026472.index
+3147079635.index
+2848571760.index
+448121210.index
+3597002816.index
+343372193.index
+675836786.index
+4293612016.index
+1165884462.index
+1416114785.index

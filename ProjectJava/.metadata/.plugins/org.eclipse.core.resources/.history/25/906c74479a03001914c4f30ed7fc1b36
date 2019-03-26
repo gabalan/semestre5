@@ -1,0 +1,20 @@
+
+public class Test extends Application {
+private Button button;
+private StackPane root;
+private Scene scene;
+public MainJavaFX() {
+System.out.print(Thread.currentThread().getName());
+System.out.println(" appelle le constructeur de la Classe MainJavaFX");
+button = new Button("Salut le monde !");
+button.setOnAction(new EventHandler<ActionEvent>() {
+@Override
+public void handle(ActionEvent event) {
+System.out.println("Hello World!");
+}} );
+// Nœud racine.
+root = new StackPane();
+root.getChildren().setAll(button);
+// Configuration de la scène.
+scene = new Scene(root);
+}

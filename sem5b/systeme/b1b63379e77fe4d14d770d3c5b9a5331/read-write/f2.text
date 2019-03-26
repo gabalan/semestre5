@@ -1,0 +1,26 @@
+Exercice 1.1 Il s’agit de programmer la commande tee output-file-name qui copie à la fois
+dans le fichier désigné en paramètre et sur sa sortie standard les données présentes sur son entrée
+standard.
+1. Lire le manuel de la commande unix tee et tester la version disponible sur votre machine.
+Lorsque l’on lance directement la commande sous le shell, il sera nécessaire d’entrer CTRL-D
+pour signifier la fin du fichier d’entrée.
+2. Programmer une version simplifiée de la commande mytee.c qui écrit seulement sur la sortie
+standard. Tester.
+3. Compléter la commande pour écrire également dans le fichier passé en paramètre.
+Exercice 1.2 Nous allons voir comment se programme une commande telle que cp pour copier
+efficacement un fichier dans un autre. L’objectif de cet exercice est non seulement de mettre en
+œuvre les appels système de base (ouvrir, lire, écrire et fermer un fichier) mais aussi de comprendre
+comment on utilise de tels appels système pour programmer des bibliothèques d’entrées/sorties de
+plus haut niveau.
+1. Compléter le code source copy.c de la commande copy qui a deux paramètres :
+copy input-file-name output-file-name
+qui recopie le contenu du fichier désigné par le premier paramètre dans le fichier désigné par
+le second. On utilisera les appels système open(), close(), read(), write(). On lira et
+écrira un seul caractère à la fois. On pourra vérifier à l’aide de la commande diff l’équivalence
+entre le fichier source et sa copie.
+2. On va écrire la même commande mais en utilisant maintenant les appels de haut niveau de la
+bibliothèque C tels que fopen(), fread(), fwrite() et fclose(). Pour cela recopier votre
+programme dans le fichier fcopy.c et modifier ce programme.
+3. Modifier le programme copy.c afin de prendre en compte un troisième paramètre : la taille
+du buffer de lecture/écriture. On utilisera la fonction atoi() pour convertir une chaine de
+caractère en nombr

@@ -1,0 +1,70 @@
+package Point2D;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+public class Item{
+	private Point2D center;
+	private int width;
+	
+	
+	public static  ArrayList<Item> collection ;
+public String toString() {
+	return center.toString() +"et la largeur est "+ this.width;
+}
+	public Item(double x,double y,int w) {
+		center=new Point2D(x,y);
+		this.width=w;
+	}
+	public Point2D getCenter() {
+		return center;
+	}
+	public int getWidth() {
+		return width;
+	}
+	protected static int squareDistance(Point2D p1, Point2D p2) {
+
+        double dx = p1.getX() - p2.getX();
+        double dy = p1.getY() - p2.getY();
+        return (int) (dx * dx + dy * dy);
+
+    }
+	public boolean contains(Point2D p) {
+
+        return squareDistance(this.center, p) <= (getWidth() / 2) * (getWidth() / 2);
+
+	}
+	
+	public static ArrayList<Item> createPlanet(int number )
+    {
+        if (number<=5)
+            number=10;
+        double x, y;
+        ArrayList<Item> testItemList = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < number; i++) {
+            x = random.nextInt(750);
+            y = random.nextInt(850);
+            Point2D p=new Point2D(x,y);
+            if (!testItemList.isEmpty()) {
+
+                for (int j = 0; j < testItemList.size(); j++) {
+
+                    while ((x == testItemList.get(j).getCenter().getX() && y== testItemList.get(j).getCenter().getY()) ||
+                    		testItemList.get(j).getCenter().distance(p)<80||
+                            x<=60 || y<=60) {
+                        x = random.nextInt(750);
+                        y = random.nextInt(850);
+
+                    }
+
+                }
+            }
+
+            testItemList.add(new Planet(x, y, 60));
+
+        }
+        return testItemList;
+    }
+}
+

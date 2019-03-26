@@ -1,0 +1,12 @@
+type 'a planar_tree = Node of 'a * 'a planar_tree list
+type 'a tree = Empty | Bin of 'a * 'a tree * 'a tree
+ type direction = Up | Down
+type dyckword = direction list
+                          (*2*)
+
+let  full_to_dyck t=
+  let rec aux t acc=
+    match t with
+    |Empty->List.rev (List.tl acc)
+    |Bin(x,Empty,Empty)->Down::acc
+    |Bin(x,g,d)->aux d (aux g (Up::acc)) in aux t [];;

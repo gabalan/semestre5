@@ -1,0 +1,343 @@
+#define _GNU_SOURCE
+
+#include "testfw.h"
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <dlfcn.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <signal.h>
+
+#define INITIAL_CAPACITY 100  //capacité du tableau de tests
+
+/* ********** STRUCTURES ********** */
+
+struct testfw_t
+{
+    char *program;
+    int timeout;
+    char *logfile;
+    char *cmd;
+    bool silent;
+    bool verbose;
+    struct test_t** tab;//tableau de tests.
+    unsigned int capacity; //capacity du tableau tab qui peut augmenter si besoin
+    int size;// le nombre de tests actuellement enregistrés dans le tableau de tests
+};
+/*extraire une sous_chaine de caractere dans une chaine de caracteres
+*src.Debut de la chaine à extraire :pos  et la taille est len.*/
+
+char *substr(char *src,int pos,int len){
+    char *dest=NULL;
+    if (len>0) {
+        dest = calloc(len+1, 1);
+        if(NULL != dest) {
+            strncat(dest,src+pos,len);
+        }
+    }
+    return dest;
+}
+/* ********** FRAMEWORK ********** */
+
+struct testfw_t *testfw_init(char *program, int timeout, char *logfile, char *cmd, bool silent, bool verbose)
+{
+    //allocation de la structure;
+    struct testfw_t * fw=(  struct testfw_t*)malloc(sizeof( struct testfw_t));
+    if (fw==NULL){
+        fprintf(stderr," ERROR: ERROR:invalid pointer *fw free in the function testfw_init\n ");
+        exit(EXIT_FAILURE);
+    }
+
+    else{
+        //initialisation des champs de la structure
+        fw->timeout = timeout;
+        fw->logfile = logfile;
+        //fw->logfile = access(fw->logfile,W_OK) == 0 ? strdup(logfile) : NULL;
+        fw->silent = silent;
+        fw->verbose = verbose;
+        fw->cmd = cmd;
+        //fw->cmd = cmd != NULL ? strdup(cmd) : NULL;
+        fw->program = program;
+        //fw->program = program != NULL ? strdup(program) : NULL;
+        //allocation du tableau de test.
+        fw->tab=(struct test_t**)malloc(INITIAL_CAPACITY*sizeof(struct test_t*));
+        if(fw->tab==NULL){
+            fprintf(stderr,"ERROR:Failure in the allocation of array tests in the function *testfw_init " );
+            exit(EXIT_FAILURE);
+        }
+        fw->capacity = INITIAL_CAPACITY;
+        fw->size = 0;
+    }
+    return fw;
+}
+
+void testfw_free(struct testfw_t *fw)
+{
+    if (fw==NULL){
+        fprintf(stderr,"ERROR:invalid pointer *fw free in the function testfw_free ");
+        exit(EXIT_FAILURE);
+    }else{//liberer tous les champs dynamiquement alloués
+        if(fw->tab!=NULL){
+            for(int i=0;i<fw->size;i++){
+                if(fw->tab[i]){
+                    if(fw->tab[i]->name){
+                        free(fw->tab[i]->name);
+                    }
+                    if(fw->tab[i]->suite){
+                        free(fw->tab[i]->suite);
+                    }
+                    free(fw->tab[i]);
+                }
+            }
+            free(fw->tab);
+        }
+        free(fw);
+    }
+}
+
+int testfw_length(struct testfw_t *fw)
+{
+    if (fw==NULL){
+        fprintf(stderr,"ERROR:invalid pointer *fw free in the function testfw_length");
+        exit(EXIT_FAILURE);
+    }
+    return fw->size;
+}
+
+struct test_t *testfw_get(struct testfw_t *fw, int k)
+{
+    if (fw==NULL || fw->tab==NULL || fw->tab[k]==NULL || k<0 )
+    {
+        fprintf(stderr,"ERROR:invalid pointer or value in the function testfw_get\n ");
+        exit(EXIT_FAILURE);
+    }
+    if (k>=fw->size)
+    {
+        fprintf(stderr,"ERROR:%d greater than the number of tests recorded\n ",k);
+        exit(EXIT_FAILURE);
+    }
+    return fw->tab[k];
+}
+
+/* ********** REGISTER TEST ********** */
+
+struct test_t *testfw_register_func(struct testfw_t *fw, char *suite, char *name, testfw_func_t func)
+{
+    if (fw==NULL)
+    {
+        fprintf(stderr," ERROR:invalid pointer fw in the function  testfw_register_func\n ");
+        exit(EXIT_FAILURE);
+    }
+    //Reallouer  le tableau de tests  s'il n y  plus de place pour ajouter un nouveau test
+    if(fw->size>=fw->capacity)
+    {
+        // On augmente la taille du tableau
+        fw->capacity+=INITIAL_CAPACITY;
+        fw->tab=(struct test_t**)realloc(fw->tab,fw->capacity*sizeof(struct test_t*));
+        if(fw->tab==NULL)
+        {
+            fprintf(stderr, "ERROR:Failure to realloc in testfw_register_func\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    //allocation du test
+    struct test_t* t=(struct test_t*)malloc(sizeof(struct test_t));
+    if (t==NULL)
+    {
+        fprintf(stderr,"  struct test_t ");
+        exit(EXIT_FAILURE);
+    }
+    int len_name=strlen(name);
+    int len_suite=strlen(suite);
+    //ici substr est utilisé pour allouer les variables name et  suite
+    char*name1=substr(name,0,len_name);
+    char*suite1=substr(suite,0,len_suite);
+    t->suite=suite1;
+    t->name=name1;
+    t->func=func;
+    fw->tab[fw->size]=t;
+    fw->size+=1;
+    return t;
+}
+
+struct test_t *testfw_register_symb(struct testfw_t *fw, char *suite, char *name)
+{
+    if (fw==NULL)
+    {
+        fprintf(stderr," ERROR:invalid pointer fw in the function  testfw_register_func\n ");
+        exit(EXIT_FAILURE);
+    }
+    void *plugin = dlopen (NULL, RTLD_NOW);
+    if (!plugin)
+    {
+        fprintf(stderr, " dlopen %s (%s)\n",dlerror(), fw->program);
+        exit(EXIT_FAILURE);
+    }
+    char *cmd;
+    asprintf(&cmd,"%s_%s",suite,name);
+    struct test_t * t;
+    testfw_func_t (func_pr);
+    func_pr = dlsym(plugin,cmd);
+
+    if(func_pr)
+    {
+        //enregistré le test
+        t=testfw_register_func(fw, suite, name, func_pr);
+    }
+    else
+    {
+        fprintf(stderr, " dlsym %s\n",dlerror());
+        dlclose(plugin);
+        exit(EXIT_FAILURE);
+    }
+    free(cmd);
+    dlclose(plugin);
+    return t;
+}
+
+int testfw_register_suite(struct testfw_t *fw, char *suite)
+{
+    int compteur=0;//compteur du nombre de tests enregistrés
+    if(fw==NULL)
+    {
+        fprintf(stderr," ERROR:invalid pointer fw in the function  testfw_register_suite\n");
+        exit(EXIT_FAILURE);
+    }
+    char *cmd;
+    asprintf(&cmd,"nm --defined-only %s | cut -d ' ' -f 3 | grep ^%s_ | cut -d '_' -f 2",fw->program,suite);
+    FILE* file=popen(cmd,"r");
+    if(file==NULL)
+    {
+        fprintf(stderr, "Failure to open with  **popen** in function test_register_suite \n" );
+        exit(EXIT_FAILURE);
+    }
+    char chaine[INITIAL_CAPACITY];
+    while (fgets(chaine,INITIAL_CAPACITY,file)!=NULL)   //lire chaque ligne
+    {
+        char *name=strtok(chaine,"\n"); //enlever le dernier caractere "\n" de la chaine lu
+        struct test_t *t=testfw_register_symb(fw,suite,name);//enregistré la test
+        if(t!=NULL)
+            compteur+=1;
+    }
+    free(cmd);
+    pclose(file);
+    return compteur;
+}
+
+void signal_handler(int sig)
+{
+}
+
+int testfw_run_all(struct testfw_t *fw, int argc, char *argv[], enum testfw_mode_t mode)
+{
+    if (!fw)
+    {
+        exit(EXIT_FAILURE);
+    }
+    int failed_tests_number = 0;
+    FILE* cmd_stream = NULL;
+    struct timeval before,after;
+    int fd;
+
+    if (fw->silent)
+    {
+        close(1);
+        close(2);
+    }
+    printf("Running tests\n");
+    switch (mode) {
+    case TESTFW_FORKS:
+    {
+        struct sigaction sa;
+        sa.sa_handler = &signal_handler;
+        sa.sa_flags = SA_RESETHAND;
+        sigemptyset(&sa.sa_mask);
+
+
+        for (int i = 0; i < fw->size; i++)
+        {
+            struct test_t* current_test = testfw_get(fw,i);
+          //  printf("Start %d: %s.%s\n",i,current_test->suite,current_test->name);
+            gettimeofday(&before, NULL);
+            alarm(fw->timeout);
+            pid_t pid = fork();
+
+            if (pid == 0)
+            {
+              if (fw->logfile)
+              {
+                fd=open(fw->logfile,O_WRONLY| O_CREAT|O_TRUNC,0644);
+              }
+              else if (fw->cmd)
+              {
+                  cmd_stream = popen(fw->cmd,"w");
+                  fd=fileno(cmd_stream);
+              }
+              dup2(fd,1);
+              dup2(fd,2);
+              close(1);
+              close(2);
+              exit(current_test->func(argc,argv));
+            }
+            sigaction(SIGALRM,&sa,NULL);
+            int status;
+            int return_value = wait(&status);
+            gettimeofday(&after, NULL);
+            alarm(0);
+          //  timersub(&before,&after,&time_taken);
+            double seconds_elasped=(after.tv_sec-before.tv_sec)*1000+(after.tv_usec-before.tv_usec)/(double)1000;
+            //double seconds_elasped = time_taken.tv_usec/1000000.0;
+
+            char* test_result = NULL;
+            if (return_value == -1)
+            {
+              status=124;
+                kill(pid,SIGKILL);
+                test_result = "TIMEOUT";
+                failed_tests_number++;
+            }
+            else
+            {
+                if (status == 0)
+                    test_result = "SUCCESS";
+                else if (WIFSIGNALED(status))
+                {
+                    int sig = WTERMSIG(status);
+                    test_result = "KILLED";
+                    failed_tests_number++;
+                    printf("[%s] run test \"%s.%s\" in %.2f ms (status \"%s\")\n",test_result,current_test->suite,current_test->name,seconds_elasped,strsignal(sig));
+                    continue;
+                }
+                else
+                {
+                    test_result = "FAILURE";
+                    status=1;
+                    failed_tests_number++;
+                }
+                if (cmd_stream)
+                    status=pclose(cmd_stream);
+
+            }
+                printf("[%s] run test \"%s.%s\" in %.2f ms (status %d)\n",test_result,current_test->suite,current_test->name,seconds_elasped,status);
+        }
+        break;
+    }
+    case TESTFW_FORKP:
+    {
+        break;
+    }
+    case TESTFW_NOFORK:
+    {
+        break;
+    }
+    }
+
+    return failed_tests_number;
+}

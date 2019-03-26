@@ -1,0 +1,1 @@
+gcc  -std=c99 -g -Wall   CMakeFiles/undead_solve.dir/solver.c.o CMakeFiles/undead_solve.dir/game.c.o CMakeFiles/undead_solve.dir/game_io.c.o  -o undead_solve -rdynamic libgame.a 

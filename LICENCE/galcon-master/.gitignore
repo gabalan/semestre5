@@ -1,0 +1,14 @@
+bin
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+#Java Project
+.project
+.classpath
+
+#Folder Cruft
+.DS_Store
