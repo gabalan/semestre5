@@ -1,5 +1,0 @@
-/net/cremi/tsdiallo001/sem4/UndeadGraphique/CMakeFiles/rebuild_cache.dir
-/net/cremi/tsdiallo001/sem4/UndeadGraphique/CMakeFiles/game.dir
-/net/cremi/tsdiallo001/sem4/UndeadGraphique/CMakeFiles/demo.dir
-/net/cremi/tsdiallo001/sem4/UndeadGraphique/CMakeFiles/model.dir
-/net/cremi/tsdiallo001/sem4/UndeadGraphique/CMakeFiles/edit_cache.dir

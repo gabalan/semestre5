@@ -1,4 +1,0 @@
-/net/cremi/tsdiallo001/sem4/sdl/sdl2-demo/CMakeFiles/edit_cache.dir
-/net/cremi/tsdiallo001/sem4/sdl/sdl2-demo/CMakeFiles/rebuild_cache.dir
-/net/cremi/tsdiallo001/sem4/sdl/sdl2-demo/CMakeFiles/model.dir
-/net/cremi/tsdiallo001/sem4/sdl/sdl2-demo/CMakeFiles/demo.dir

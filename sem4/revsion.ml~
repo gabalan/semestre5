@@ -1,4 +1,0 @@
-let rec mult l a n=
-  if n=0 then l
-  else mult a::l (n-1)
-                 

@@ -1,1 +1,0 @@
-gcc  -std=c99 -g -Wall   CMakeFiles/testSAM.dir/testSAM.c.o CMakeFiles/testSAM.dir/game.c.o CMakeFiles/testSAM.dir/game_io.c.o  -o testSAM -rdynamic libgame.a 

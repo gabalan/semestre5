@@ -1,1 +1,0 @@
-/usr/bin/cc  -std=c99 -g -fprofile-arcs -ftest-coverage -Wall   CMakeFiles/aleatoire.dir/aleatoire.c.o CMakeFiles/aleatoire.dir/game.c.o CMakeFiles/aleatoire.dir/game_io.c.o  -o aleatoire -rdynamic 
